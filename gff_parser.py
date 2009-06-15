@@ -55,7 +55,11 @@ def read(fp):
         # unquote all of the other values & store them in a new dict
         row_d = Bag([ (k, urllib.unquote(v)) for (k, v) in row.items() \
                        if k != 'attributes' ])
-        
+
+        # convert int coords
+        row_d['start'] = int(row_d['start'])
+        row_d['end'] = int(row_d['end'])
+
         # save attributes back into it
         row_d['attributes'] = attr_d
         
@@ -93,7 +97,17 @@ def read_groups(fp, collector_fn=None):
     if collect:
         yield collect
 
+def parse_target(s):
+    target = s.split(' ')
+    name, start, stop = target[:3]
+    ori = '+'
+    if len(target) == 4:
+        ori = target[3]
+
+    return name, int(start), int(stop), ori
+
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
     
+
