@@ -23,7 +23,8 @@ class Bag(dict):
     """
     def __init__(self, *args, **kw):
         dict.__init__(self, *args, **kw)
-        self.__dict__.update(kw)
+        for k in self.keys():
+            self.__dict__[k] = self.__getitem__(k)
 
     def __setitem__(self, k, v):
         dict.__setitem__(self, k, v)
@@ -60,6 +61,37 @@ def read(fp):
         
         # done!
         yield row_d
+
+parent_collector_fn = lambda x: x.attributes.Parent
+    
+def read_groups(fp, collector_fn=None):
+    """Read collections, grouping by provided criterion.  Default is Parent.
+
+    'collector_fn' is an optional callable that returns a cookie; this
+    cookie is used to decide whether or not to start a new collection.  It
+    should return something with reasonable '==' behavior (e.g. a string!)
+    and should never return None.
+
+    Note, groupings must be contiguous within file.
+    
+    Returns lists of Bag objects representing each row.
+    """
+    if collector_fn is None:
+        collector_fn = parent_collector_fn
+        
+    parent = None
+    collect = []
+    for row in read(fp):
+        if parent != collector_fn(row):
+            if collect:
+                yield collect
+            collect = []
+            parent = collector_fn(row)
+            
+        collect.append(row)
+
+    if collect:
+        yield collect
 
 if __name__ == '__main__':
     import doctest
