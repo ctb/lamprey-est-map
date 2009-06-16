@@ -1,8 +1,12 @@
-"""See http://www.sequenceontology.org/gff3.shtml.
+"""GFF parser.
 
-Note, for gaps, see
+See http://www.sequenceontology.org/gff3.shtml.
+
+Note, for gap format, see
 
 http://may2005.archive.ensembl.org/Docs/wiki/html/EnsemblDocs/CigarFormat.html
+
+read(fp) is the main function provided by this module.
 """
 
 import csv
@@ -97,8 +101,9 @@ def read_groups(fp, collector_fn=None):
     if collect:
         yield collect
 
-def parse_target(s):
-    target = s.split(' ')
+def parse_target(row):
+    """Extract Target attr information from the given row."""
+    target = row.attributes.Target.split(' ')
     name, start, stop = target[:3]
     ori = '+'
     if len(target) == 4:
