@@ -2,7 +2,7 @@ import sys
 import gff_parser
 import gmap_pygr
 import pprint
-from pygr import seqdb
+from pygr import seqdb, cnestedlist
 from itertools import izip
 
 genome = '/scratch/titus/lamprey/supercontigs.fa'
@@ -12,8 +12,12 @@ genome_db = seqdb.SequenceFileDB(genome)
 ests_db = seqdb.SequenceFileDB(ests)
 
 fp = open(sys.argv[1])
-ivals = gmap_pygr.build_ivals(fp, genome_db, ests_db)
+paths = gmap_pygr.build_ivals(fp, genome_db, ests_db)
 
-first100 = list(izip(range(100), ivals))
+al = cnestedlist.NLMSA('foo', 'memory', pairwiseMode=True)
+for n, (path, ivals) in enumerate(paths):
+    if n > 100:
+        break
+    al.add_aligned_intervals(ivals)
 
-pprint.pprint(first100)
+al.build()
