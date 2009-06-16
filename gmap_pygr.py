@@ -71,5 +71,10 @@ def build_ivals(fp, genome_db, ests_db):
 
         yield row.attributes.ID, ivals
 
+def build_alignment(al, fp, genome_db, ests_db):
+    """Build an NLMSA out of the GMAP alignment in fp."""
+    for path, ivals in build_ivals(fp, genome_db, ests_db):
+        al.add_aligned_intervals(ivals)
+
 if __name__ == '__main__':
     pass
