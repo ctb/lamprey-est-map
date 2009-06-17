@@ -47,7 +47,7 @@ def build_ivals(fp, genome_db, ests_db):
     Yields (pathname, ivals) where ivals is a list of interval pairs.
     """
 
-    for n, row in enumerate(gff_parser.read(fp)):
+    for row in gff_parser.read(fp):
         ivals = []
         src_seq = get_src_sequence(genome_db, row)
         dest_seq = get_dest_sequence(ests_db, row)
