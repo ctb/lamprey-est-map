@@ -34,7 +34,7 @@ class Bag(dict):
         dict.__setitem__(self, k, v)
         self.__dict__[k] = v
 
-def read(fp):
+def read(fp, parse_attributes=True):
     """Parse the given fp as GFF3, yielding Bag objects containing row info.
     """
     
@@ -44,18 +44,6 @@ def read(fp):
         if row['seqid'].startswith('#'):
             continue
 
-        # pick out the attributes and deal with them specially:
-        #  - only unquote after splitting on ;
-        #  - make them into a dictionary
-        
-        attr = row['attributes']
-        attr = attr.split(';')
-        attr_d = Bag()
-        for kv in attr:
-            k, v = kv.split('=', 1)
-            k, v = urllib.unquote(k), urllib.unquote(v)
-            attr_d[k] = v
-
         # unquote all of the other values & store them in a new dict
         row_d = Bag([ (k, urllib.unquote(v)) for (k, v) in row.items() \
                        if k != 'attributes' ])
@@ -64,8 +52,24 @@ def read(fp):
         row_d['start'] = int(row_d['start'])
         row_d['end'] = int(row_d['end'])
 
-        # save attributes back into it
-        row_d['attributes'] = attr_d
+        if parse_attributes:
+            # pick out the attributes and deal with them specially:
+            #  - only unquote after splitting on ;
+            #  - make them into a dictionary
+
+            attr = row['attributes']
+            attr = attr.split(';')
+            attr_d = Bag()
+            for kv in attr:
+                k, v = kv.split('=', 1)
+                k, v = urllib.unquote(k), urllib.unquote(v)
+                attr_d[k] = v
+
+            # save attributes back into it
+            row_d['attributes'] = attr_d
+        else:
+            # we don't want to unquote them if we're not parsing.
+            row_d['attributes'] = row['attributes']
         
         # done!
         yield row_d
